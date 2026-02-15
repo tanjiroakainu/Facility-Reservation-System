@@ -5,6 +5,13 @@
       <p class="page-desc">View and manage registered client accounts. Admin account is fixed.</p>
     </header>
 
+    <div class="card p-4 mb-6">
+      <h2 class="section-title mb-3">Accounts overview</h2>
+      <div class="h-56">
+        <Doughnut v-if="usersChartData" :data="usersChartData" :options="usersChartOptions" />
+      </div>
+    </div>
+
     <!-- System admin (read-only) -->
     <div class="card p-6 mb-6">
       <h2 class="section-title mb-3">System admin</h2>
@@ -57,10 +64,29 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { Doughnut } from 'vue-chartjs'
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
 import { useAuthStore } from '@/stores/authStore'
+import { chartColors, doughnutOptions } from '@/utils/chartTheme'
 import type { ClientUser } from '@/stores/authStore'
 
+ChartJS.register(ArcElement, Tooltip, Legend)
+
 const store = useAuthStore()
+
+const usersChartData = computed(() => ({
+  labels: ['Admin', 'Registered clients'],
+  datasets: [{
+    data: [1, store.clients.length],
+    backgroundColor: [chartColors.cyan + 'dd', chartColors.green + 'dd'],
+    borderColor: [chartColors.cyan, chartColors.green],
+    borderWidth: 2,
+  }],
+}))
+
+const usersChartOptions = doughnutOptions()
+
 
 function confirmDelete(user: ClientUser) {
   if (window.confirm(`Delete user "${user.name}" (${user.email})? This cannot be undone.`)) {

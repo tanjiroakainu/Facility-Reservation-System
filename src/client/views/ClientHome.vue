@@ -5,6 +5,13 @@
       <p class="page-desc">Neon green = available to reserve. Neon red = currently unavailable.</p>
     </header>
 
+    <div class="card p-4 mb-6">
+      <h2 class="section-title mb-3">Availability at a glance</h2>
+      <div class="h-52">
+        <Doughnut v-if="availabilityChartData" :data="availabilityChartData" :options="chartOptions" />
+      </div>
+    </div>
+
     <div class="legend">
       <span class="legend-item">
         <span class="legend-dot legend-dot-available" aria-hidden="true" />
@@ -46,7 +53,7 @@
         </router-link>
         <router-link
           v-else-if="f.available"
-          :to="{ name: 'ClientLogin', query: { redirect: `/client/reserve?facilityId=${f.id}` } }"
+          :to="{ name: 'Login', query: { redirect: `/client/reserve?facilityId=${f.id}` } }"
           class="facility-card-action facility-card-action-login"
         >
           Login to reserve
@@ -58,9 +65,31 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { Doughnut } from 'vue-chartjs'
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
 import { useFacilityStore } from '@/stores/facilityStore'
 import { useAuthStore } from '@/stores/authStore'
+import { chartColors, doughnutOptions } from '@/utils/chartTheme'
+
+ChartJS.register(ArcElement, Tooltip, Legend)
 
 const store = useFacilityStore()
 const auth = useAuthStore()
+
+const availabilityChartData = computed(() => {
+  const available = store.facilities.filter(f => f.available).length
+  const unavailable = store.facilities.length - available
+  return {
+    labels: ['Available', 'Unavailable'],
+    datasets: [{
+      data: [available, unavailable],
+      backgroundColor: [chartColors.green + 'dd', chartColors.red + 'dd'],
+      borderColor: [chartColors.green, chartColors.red],
+      borderWidth: 2,
+    }],
+  }
+})
+
+const chartOptions = doughnutOptions()
 </script>

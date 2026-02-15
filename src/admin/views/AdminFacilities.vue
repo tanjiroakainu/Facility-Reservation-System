@@ -15,6 +15,22 @@
       </button>
     </header>
 
+    <!-- Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <div class="card p-4">
+        <h2 class="section-title mb-3">Capacity by facility</h2>
+        <div class="h-64">
+          <Bar v-if="facilityChartData" :data="facilityChartData" :options="facilityChartOptions" />
+        </div>
+      </div>
+      <div class="card p-4">
+        <h2 class="section-title mb-3">Availability</h2>
+        <div class="h-64">
+          <Doughnut v-if="availabilityChartData" :data="availabilityChartData" :options="availabilityChartOptions" />
+        </div>
+      </div>
+    </div>
+
     <!-- Add / Edit form -->
     <div v-if="showAdd || editingId" class="card p-6 mb-6">
       <h2 class="section-title mb-4">{{ editingId ? 'Edit facility' : 'New facility' }}</h2>
@@ -98,11 +114,45 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
+import { Bar, Doughnut } from 'vue-chartjs'
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js'
 import { useFacilityStore } from '@/stores/facilityStore'
+import { chartColors, barOptions, doughnutOptions } from '@/utils/chartTheme'
 import type { Facility } from '@/types/facility'
 
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement)
+
 const store = useFacilityStore()
+
+const facilityChartData = computed(() => ({
+  labels: store.facilities.map(f => f.name),
+  datasets: [{
+    label: 'Capacity',
+    data: store.facilities.map(f => f.capacity),
+    backgroundColor: store.facilities.map(() => chartColors.cyan + 'cc'),
+    borderColor: chartColors.cyan,
+    borderWidth: 1,
+  }],
+}))
+
+const facilityChartOptions = barOptions()
+
+const availabilityChartData = computed(() => {
+  const available = store.facilities.filter(f => f.available).length
+  const unavailable = store.facilities.length - available
+  return {
+    labels: ['Available', 'Unavailable'],
+    datasets: [{
+      data: [available, unavailable],
+      backgroundColor: [chartColors.green + 'dd', chartColors.red + 'dd'],
+      borderColor: [chartColors.green, chartColors.red],
+      borderWidth: 2,
+    }],
+  }
+})
+
+const availabilityChartOptions = doughnutOptions()
 
 const showAdd = ref(false)
 const editingId = ref<string | null>(null)

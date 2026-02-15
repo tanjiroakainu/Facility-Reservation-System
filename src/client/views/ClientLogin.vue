@@ -38,7 +38,7 @@
         <router-link to="/client/register" class="auth-link">Register</router-link>
         <span class="block mt-3 text-slate-500">
           Admin?
-          <router-link to="/admin/login" class="auth-link">Sign in at Admin Login</router-link>
+          <router-link to="/login" class="auth-link">Sign in</router-link>
         </span>
       </p>
     </div>

@@ -15,5 +15,5 @@ export interface Reservation {
   date: string
   startTime: string
   endTime: string
-  status: 'pending' | 'confirmed' | 'cancelled'
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled'
 }

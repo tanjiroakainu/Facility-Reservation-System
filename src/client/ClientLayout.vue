@@ -19,7 +19,7 @@
             <button type="button" class="nav-link nav-link-btn" @click="logout">Logout</button>
           </template>
           <template v-else>
-            <router-link to="/client/login" class="nav-link">Login</router-link>
+            <router-link to="/login" class="nav-link">Login</router-link>
             <router-link to="/client/register" class="nav-link nav-link-cta">Register</router-link>
           </template>
         </div>

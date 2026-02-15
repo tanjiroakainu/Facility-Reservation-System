@@ -29,6 +29,6 @@ const auth = useAuthStore()
 
 function logout() {
   auth.logoutAdmin()
-  router.push('/admin/login')
+  router.push('/login')
 }
 </script>

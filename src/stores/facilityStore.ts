@@ -45,6 +45,11 @@ export const useFacilityStore = defineStore('facility', () => {
     reservations.value.push({ ...res, id: 'r' + Date.now() })
   }
 
+  function updateReservationStatus(id: string, status: Reservation['status']) {
+    const r = reservations.value.find(x => x.id === id)
+    if (r) r.status = status
+  }
+
   return {
     facilities,
     reservations,
@@ -55,5 +60,6 @@ export const useFacilityStore = defineStore('facility', () => {
     updateFacility,
     deleteFacility,
     addReservation,
+    updateReservationStatus,
   }
 })

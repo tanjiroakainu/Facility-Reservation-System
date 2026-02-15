@@ -10,6 +10,12 @@ const routes: RouteRecordRaw[] = [
     redirect: '/client',
   },
   {
+    path: '/login',
+    name: 'Login',
+    component: () => import('@/views/Login.vue'),
+    meta: { guest: true },
+  },
+  {
     path: '/admin',
     component: AdminLayout,
     meta: { requiresAdmin: true },
@@ -22,9 +28,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/admin/login',
-    name: 'AdminLogin',
-    component: () => import('@/admin/views/AdminLogin.vue'),
-    meta: { guestAdmin: true },
+    redirect: '/login',
   },
   {
     path: '/client',
@@ -33,7 +37,7 @@ const routes: RouteRecordRaw[] = [
       { path: '', name: 'ClientHome', component: () => import('@/client/views/ClientHome.vue') },
       { path: 'reserve', name: 'ClientReserve', component: () => import('@/client/views/ClientReserve.vue'), meta: { requiresClient: true } },
       { path: 'register', name: 'ClientRegister', component: () => import('@/client/views/ClientRegister.vue') },
-      { path: 'login', name: 'ClientLogin', component: () => import('@/client/views/ClientLogin.vue') },
+      { path: 'login', redirect: '/login' },
     ],
   },
 ]
@@ -46,16 +50,22 @@ export const router = createRouter({
 router.beforeEach((to, _from, next) => {
   const auth = useAuthStore()
   if (to.meta.requiresAdmin && !auth.isAdmin) {
-    next({ path: '/admin/login', query: { redirect: to.fullPath } })
+    next({ path: '/login', query: { redirect: to.fullPath } })
     return
   }
   if (to.meta.requiresClient && !auth.isClientLoggedIn) {
-    next({ path: '/client/login', query: { redirect: to.fullPath } })
+    next({ path: '/login', query: { redirect: to.fullPath } })
     return
   }
-  if (to.meta.guestAdmin && auth.isAdmin) {
-    next('/admin')
-    return
+  if (to.meta.guest && to.path === '/login') {
+    if (auth.isAdmin) {
+      next('/admin')
+      return
+    }
+    if (auth.isClientLoggedIn) {
+      next('/client')
+      return
+    }
   }
   next()
 })

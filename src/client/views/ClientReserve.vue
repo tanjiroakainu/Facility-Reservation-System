@@ -5,6 +5,13 @@
       <p class="page-desc">Select an available facility and fill in the details.</p>
     </header>
 
+    <div class="card p-4 mb-6">
+      <h2 class="section-title mb-3">Reservations by facility</h2>
+      <div class="h-52">
+        <Bar v-if="reservationsChartData" :data="reservationsChartData" :options="barChartOptions" />
+      </div>
+    </div>
+
     <section class="section-card mb-8">
       <h2 class="section-title">Availability at a glance</h2>
       <div class="availability-chips">
@@ -65,12 +72,38 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { Bar } from 'vue-chartjs'
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js'
 import { useFacilityStore } from '@/stores/facilityStore'
 import { useAuthStore } from '@/stores/authStore'
+import { chartColors, barOptions } from '@/utils/chartTheme'
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 const route = useRoute()
 const store = useFacilityStore()
 const auth = useAuthStore()
+
+const reservationsChartData = computed(() => {
+  const byName: Record<string, number> = {}
+  store.reservations.forEach(r => {
+    byName[r.facilityName] = (byName[r.facilityName] ?? 0) + 1
+  })
+  const labels = store.facilities.map(f => f.name)
+  const data = labels.map(name => byName[name] ?? 0)
+  return {
+    labels,
+    datasets: [{
+      label: 'Reservations',
+      data,
+      backgroundColor: data.map(() => chartColors.cyan + 'cc'),
+      borderColor: chartColors.cyan,
+      borderWidth: 1,
+    }],
+  }
+})
+
+const barChartOptions = barOptions()
 
 const selectedId = ref<string | null>((route.query.facilityId as string) ?? null)
 const form = ref({
